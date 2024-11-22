@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Kenyan Elections 2024</title>
+    <link rel="stylesheet" href="css/admin-styles.css"> <!-- Admin specific CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTRynLKt4kal4sk5XrYSkMqzwFwJuzbhU",
+            authDomain: "online-election-project-9494b.firebaseapp.com",
+            projectId: "online-election-project-9494b",
+            storageBucket: "online-election-project-9494b.firebasestorage.app",
+            messagingSenderId: "872909518027",
+            appId: "1:872909518027:web:31a5cc7985e0e7817f574e",
+            measurementId: "G-262J106EM6"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchResults() {
+            try {
+                const positions = ['presidential', 'gubernatorial', 'senatorial', 'mp'];
+                const data = {};
+
+                for (const position of positions) {
+                    const querySnapshot = await getDocs(collection(db, position));
+
+                    data[position] = querySnapshot.docs.map(doc => ({
+                        name: doc.id,
+                        votes: doc.data().votes || 0
+                    }));
+                }
+
+                renderCharts(data);
+                calculateWinners(data);
+            } catch (error) {
+                console.error('Error fetching election results:', error);
+                alert('Failed to fetch election data.');
+            }
+        }
+
+        function renderCharts(data) {
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+            renderIndividualChart(data.presidential, 'presidentialChart', 'Presidential Results', colors);
+            renderIndividualChart(data.gubernatorial, 'gubernatorialChart', 'Gubernatorial Results', colors);
+            renderIndividualChart(data.senatorial, 'senatorialChart', 'Senatorial Results', colors);
+            renderIndividualChart(data.mp, 'mpChart', 'MP Results', colors);
+        }
+
+        function renderIndividualChart(data, chartId, chartTitle, colors) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            if (data && data.length > 0) {
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(candidate => candidate.name),
+                        datasets: [{
+                            data: data.map(candidate => candidate.votes),
+                            backgroundColor: colors.slice(0, data.length)
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartTitle
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function calculateWinners(data) {
+            const winners = document.getElementById('winners');
+            winners.innerHTML = `
+                <h3>Live Updates for Current Winners for Election 2024</h3>
+                <p><strong>Presidential:</strong> ${data.presidential && data.presidential.length > 0 ? data.presidential.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>Governor:</strong> ${data.gubernatorial && data.gubernatorial.length > 0 ? data.gubernatorial.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>Senator:</strong> ${data.senatorial && data.senatorial.length > 0 ? data.senatorial.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>MP:</strong> ${data.mp && data.mp.length > 0 ? data.mp.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+            `;
+        }
+
+        window.onload = fetchResults;
+
+        // Disable results page
+        function toggleResultsPage() {
+            const resultSection = document.getElementById('resultsSection');
+            const toggleBtn = document.getElementById('disableBtn');
+            if (resultSection.style.display === 'none') {
+                resultSection.style.display = 'block';
+                toggleBtn.innerText = 'Disable Results Page';
+            } else {
+                resultSection.style.display = 'none';
+                toggleBtn.innerText = 'Enable Results Page';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <ul>
+            <li><a href="#resultsSection">Election Results</a></li>
+            <li><a href="#settings">Settings</a></li>
+            <li><a href="Signin.html">Sign Out</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header class="header">
+            <h1>2024 Kenyan Election Admin Dashboard</h1>
+        </header>
+
+        <main>
+            <div id="resultsSection" class="results-section">
+                <h2>Election Results Overview</h2>
+                <button id="disableBtn" onclick="toggleResultsPage()">Disable Results Page</button>
+
+                <div class="chart-tiles">
+                    <div class="card">
+                        <h3>Result for Presidential</h3>
+                        <canvas id="presidentialChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Result for Governors</h3>
+                        <canvas id="gubernatorialChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Result for Senators</h3>
+                        <canvas id="senatorialChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Result for Member of Parliament</h3>
+                        <canvas id="mpChart" width="200" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div id="winners" class="winners-section"></div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

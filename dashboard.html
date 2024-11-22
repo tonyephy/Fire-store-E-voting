@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenyan Elections 2024</title>
+    <link rel="stylesheet" href="css/styles.css"> <!-- Link to external CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for pie chart -->
+    <script type="module">
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTRynLKt4kal4sk5XrYSkMqzwFwJuzbhU",
+            authDomain: "online-election-project-9494b.firebaseapp.com",
+            projectId: "online-election-project-9494b",
+            storageBucket: "online-election-project-9494b.firebasestorage.app",
+            messagingSenderId: "872909518027",
+            appId: "1:872909518027:web:31a5cc7985e0e7817f574e",
+            measurementId: "G-262J106EM6"
+        };
+
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, doc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Function Definitions
+        const positions = ['presidential', 'gubernatorial', 'senatorial', 'mp'];
+        let currentPosition = 0;
+        let selectedCandidate = '';
+        let currentSection = '';
+
+        function updateProgress() {
+            const progress = (currentPosition / positions.length) * 100;
+            document.getElementById('votingProgress').style.width = `${progress}%`;
+        }
+
+        window.showConfirmation = function(candidate, section) {
+            selectedCandidate = candidate;
+            currentSection = section; // Store current section
+            document.getElementById('confirmationText').innerText = `Are you sure you want to vote for ${candidate}?`;
+            document.getElementById('confirmationModal').style.display = 'block';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        };
+
+        window.confirmVote = function() {
+            const voteData = {
+                candidate: selectedCandidate, 
+                section: currentSection 
+            };
+
+            // Reference to the candidate document
+            const candidateRef = doc(collection(db, currentSection), selectedCandidate);
+
+            // Attempt to update the vote count
+            updateDoc(candidateRef, {
+                votes: increment(1)
+            }).then(() => {
+                console.log('Vote recorded for:', voteData);
+                closeModal();
+                if (currentPosition < positions.length - 1) {
+                    currentPosition++;
+                    updateProgress();
+                    switchSection();
+                } else {
+                    showResults();
+                }
+            }).catch(error => {
+                if (error.code === 'not-found') {
+                    // Document does not exist, create it with an initial vote count
+                    setDoc(candidateRef, { votes: 1 })
+                        .then(() => {
+                            console.log('Vote recorded for:', voteData);
+                            closeModal();
+                            if (currentPosition < positions.length - 1) {
+                                currentPosition++;
+                                updateProgress();
+                                switchSection();
+                            } else {
+                                showResults();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error creating candidate document:', error);
+                        });
+                } else {
+                    console.error('Error recording vote:', error);
+                }
+            });
+        };
+
+        function switchSection() {
+            positions.forEach((position, index) => {
+                document.getElementById(position).style.display = index === currentPosition ? 'block' : 'none';
+            });
+        }
+
+        function showResults() {
+            window.location.href = 'result.html';
+        }
+
+        // Initialize the voting sections
+        window.onload = function() {
+            switchSection();
+            updateProgress();
+        };
+    </script>
+</head>
+<body>
+    <div class="national-colors">
+        <div class="color-black"></div>
+        <div class="color-red"></div>
+        <div class="color-green"></div>
+    </div>
+
+    <header class="header">
+        <h1>IEBC - Electronic Voting System 2024</h1>
+        <div class="progress-bar">
+            <div class="progress" id="votingProgress"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Presidential Section -->
+        <div class="voting-section active" id="presidential">
+            <h2 class="position-title">Presidential Candidates</h2>
+            <div class="candidates-grid">
+                <div class="candidate-card" onclick="showConfirmation('Raila Odinga', 'presidential')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Raila Odinga</h3>
+                        <p class="party-name">Azimio La Umoja</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('William Ruto', 'presidential')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">William Ruto</h3>
+                        <p class="party-name">Kenya Kwanza</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Wajackoyah', 'presidential')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">George Wajackoyah</h3>
+                        <p class="party-name">Roots Party</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gubernatorial Section -->
+        <div class="voting-section" id="gubernatorial">
+            <h2 class="position-title">Gubernatorial Candidates</h2>
+            <div class="candidates-grid">
+                <div class="candidate-card" onclick="showConfirmation('Johnson Sakaja', 'gubernatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Johnson Sakaja</h3>
+                        <p class="party-name">UDA</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Polycarp Igathe', 'gubernatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Polycarp Igathe</h3>
+                        <p class="party-name">Jubilee</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Agnes Kagure', 'gubernatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Agnes Kagure</h3>
+                        <p class="party-name">Independent</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Senatorial Section -->
+        <div class="voting-section" id="senatorial">
+            <h2 class="position-title">Senatorial Candidates</h2>
+            <div class="candidates-grid">
+                <div class="candidate-card" onclick="showConfirmation('Edwin Sifuna', 'senatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Edwin Sifuna</h3>
+                        <p class="party-name">ODM</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Margaret Wanjiru', 'senatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Margaret Wanjiru</h3>
+                        <p class="party-name">UDA</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Karen Nyamu', 'senatorial')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Karen Nyamu</h3>
+                        <p class="party-name">Independent</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MP Section -->
+        <div class="voting-section" id="mp">
+            <h2 class="position-title">Member of Parliament Candidates</h2>
+            <div class="candidates-grid">
+                <div class="candidate-card" onclick="showConfirmation('Babu Owino', 'mp')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Babu Owino</h3>
+                        <p class="party-name">ODM</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('Charles Njagua', 'mp')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">Charles Njagua</h3>
+                        <p class="party-name">UDA</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+
+                <div class="candidate-card" onclick="showConfirmation('John Kiarie', 'mp')">
+                    <div class="candidate-info">
+                        <h3 class="candidate-name">John Kiarie</h3>
+                        <p class="party-name">Jubilee</p>
+                        <button class="vote-btn">KURA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <h2>Confirm Your Vote</h2>
+            <p id="confirmationText">Are you sure you want to vote for [Candidate]?</p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="confirmVote()">Confirm Vote</button>
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

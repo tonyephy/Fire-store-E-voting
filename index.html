@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Election Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        header {
+            background: #2C3E50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .hero {
+            background: url('https://source.unsplash.com/1600x900/?election') no-repeat center center / cover;
+            height: 70vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            margin: 0;
+        }
+        .hero p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #E74C3C;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #c0392b;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .feature {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 20px;
+            width: 30%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            transition: transform 0.3s;
+        }
+        .feature:hover {
+            transform: scale(1.05);
+        }
+        .testimonials {
+            background: #f2f2f2;
+            padding: 40px 20px;
+            margin: 20px 0;
+        }
+        .testimonial {
+            width: 30%;
+            margin: 0 auto;
+            text-align: center;
+            font-style: italic;
+        }
+        footer {
+            background: #2C3E50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .feature, .testimonial {
+                width: 80%;
+            }
+            .hero h1 {
+                font-size: 2.5em;
+            }
+            .hero p {
+                font-size: 1.2em;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+            .hero p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Online Election Platform</h1>
+</header>
+
+<div class="hero">
+    <div>
+        <h1>Empower Your Vote</h1>
+        <p>Join us for a secure and transparent election experience.</p>
+        <a href="Signin.html" class="btn">Sign Up Now</a>
+    </div>
+</div>
+
+<div class="content">
+    <h2>Why Choose Our Platform?</h2>
+    <div class="features">
+        <div class="feature">
+            <h3>Secure Voting</h3>
+            <p>Your vote is protected with advanced encryption and security measures.</p>
+        </div>
+        <div class="feature">
+            <h3>Real-Time Results</h3>
+            <p>Get live updates on election results as they happen.</p>
+        </div>
+        <div class="feature">
+            <h3>User-Friendly Interface</h3>
+            <p>Our platform is designed for ease of use, ensuring a smooth voting experience.</p>
+        </div>
+    </div>
+</div>
+
+<div class="testimonials">
+    <h2>What Our Users Say</h2>
+    <div class="features">
+        <div class="testimonial">
+            <p>"This platform made voting easy and secure!"</p>
+            <p><strong>- Sarah K.</strong></p>
+        </div>
+        <div class="testimonial">
+            <p>"I loved the real-time updates during the election!"</p>
+            <p><strong>- John D.</strong></p>
+        </div>
+        <div class="testimonial">
+            <p>"A seamless experience from start to finish!"</p>
+            <p><strong>- Emily R.</strong></p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 Online Election Platform. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

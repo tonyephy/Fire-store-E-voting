@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results - Kenyan Elections 2024</title>
+    <link rel="stylesheet" href="css/result.css">
+    <link rel="stylesheet" href="css/styles.css"> <!-- Link to external CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTRynLKt4kal4sk5XrYSkMqzwFwJuzbhU",
+            authDomain: "online-election-project-9494b.firebaseapp.com",
+            projectId: "online-election-project-9494b",
+            storageBucket: "online-election-project-9494b.firebasestorage.app",
+            messagingSenderId: "872909518027",
+            appId: "1:872909518027:web:31a5cc7985e0e7817f574e",
+            measurementId: "G-262J106EM6"
+        };
+
+        // Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fetch election results
+        async function fetchResults() {
+            try {
+                const positions = ['presidential', 'gubernatorial', 'senatorial', 'mp'];
+                const data = {};
+
+                for (const position of positions) {
+                    const querySnapshot = await getDocs(collection(db, position));
+
+                    // Debugging: log data for each position
+                    console.log(`Fetching data for ${position}...`);
+                    data[position] = querySnapshot.docs.map(doc => ({
+                        name: doc.id, // Assuming document ID is the candidate's name
+                        votes: doc.data().votes || 0 // Default to 0 votes if field is missing
+                    }));
+
+                    console.log(`Fetched data for ${position}:`, data[position]);
+                }
+
+                console.log('Complete election data:', data);
+
+                renderCharts(data); // Render the charts using the fetched data
+                calculateWinners(data); // Calculate and display winners
+            } catch (error) {
+                console.error('Error fetching election results:', error);
+                alert('Failed to fetch election data. Please check your Firebase setup.');
+            }
+        }
+
+        // Render the charts
+        function renderCharts(data) {
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+
+            // Presidential Chart
+            const ctxPres = document.getElementById('presidentialChart').getContext('2d');
+            if (data.presidential && data.presidential.length > 0) {
+                new Chart(ctxPres, {
+                    type: 'pie',
+                    data: {
+                        labels: data.presidential.map(candidate => candidate.name),
+                        datasets: [{
+                            data: data.presidential.map(candidate => candidate.votes),
+                            backgroundColor: colors.slice(0, data.presidential.length)
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Presidential Results'
+                            }
+                        }
+                    }
+                });
+                console.log('Presidential chart rendered successfully.');
+            } else {
+                console.warn('No data available for presidential results.');
+                alert('Presidential results are not available. Please check the data.');
+            }
+
+            // Render other charts similarly
+            renderIndividualChart(data.gubernatorial, 'gubernatorialChart', 'Gubernatorial Results', colors);
+            renderIndividualChart(data.senatorial, 'senatorialChart', 'Senatorial Results', colors);
+            renderIndividualChart(data.mp, 'mpChart', 'MP Results', colors);
+        }
+
+        // Helper function to render individual charts
+        function renderIndividualChart(data, chartId, chartTitle, colors) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            if (data && data.length > 0) {
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(candidate => candidate.name),
+                        datasets: [{
+                            data: data.map(candidate => candidate.votes),
+                            backgroundColor: colors.slice(0, data.length)
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartTitle
+                            }
+                        }
+                    }
+                });
+                console.log(`${chartTitle} chart rendered successfully.`);
+            } else {
+                console.warn(`No data available for ${chartTitle.toLowerCase()}.`);
+            }
+        }
+
+        // Calculate and display winners
+        function calculateWinners(data) {
+            const winners = document.getElementById('winners');
+            winners.innerHTML = `
+                <h3>Live Updates for Current Winners for Election 2024</h3>
+                <p><strong>Presidential:</strong> ${data.presidential && data.presidential.length > 0 ? data.presidential.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>Governor:</strong> ${data.gubernatorial && data.gubernatorial.length > 0 ? data.gubernatorial.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>Senator:</strong> ${data.senatorial && data.senatorial.length > 0 ? data.senatorial.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+                <p><strong>MP:</strong> ${data.mp && data.mp.length > 0 ? data.mp.reduce((prev, curr) => (prev.votes > curr.votes ? prev : curr)).name : 'No data'}</p>
+            `;
+        }
+
+        window.onload = fetchResults;
+    </script>
+</head>
+<body>
+    <div class="national-colors">
+        <div class="color-black"></div>
+        <div class="color-red"></div>
+        <div class="color-green"></div>
+    </div>
+
+    <header class="header">
+        <h1>2024 Kenyan Election Results</h1>
+        <p>Live updates and winners across all positions</p>
+    </header>
+
+    <main class="results-section">
+        <h2>Results Overview</h2>
+        <div class="chart-tiles">
+            <div class="card">
+                <h3>Result for Presidential</h3>
+                <canvas id="presidentialChart" width="200" height="200"></canvas>
+            </div>
+            <div class="card">
+                <h3>Result for Governors</h3>
+                <canvas id="gubernatorialChart" width="200" height="200"></canvas>
+            </div>
+            <div class="card">
+                <h3>Result for Senators</h3>
+                <canvas id="senatorialChart" width="200" height="200"></canvas>
+            </div>
+            <div class="card">
+                <h3>Result for Member of Parliament</h3>
+                <canvas id="mpChart" width="200" height="200"></canvas>
+            </div>
+        </div>
+        <div id="winners" class="winners-section"></div>
+    </main>
+
+    <div class="card">
+        <h3>Leave This Page to sign in</h3>
+        <h3><a href="Signin.html" style="color: red;">Sign Out</a></h3>
+    </div>
+</body>
+</html>
