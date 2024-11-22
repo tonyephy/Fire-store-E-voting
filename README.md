@@ -25,7 +25,7 @@ This project is a web-based electronic voting system for the 2024 Kenyan electio
 
 ## Installation
 
-1. **Clone the repository**:
+1. **Clone the repository**: 
 
    ```bash
    git clone https://github.com/tonyephy/eVoteSystem.git
